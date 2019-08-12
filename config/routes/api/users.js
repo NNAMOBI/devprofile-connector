@@ -5,7 +5,7 @@ const router = express.Router();
 const { check, validationResult } = require('express-validator')
 const User = require('../../../models/User');
 const gravatar = require('gravatar');
-const bcyrpt = require('bcryptjs');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken')
 const config = require('config')
 
@@ -54,8 +54,8 @@ router.post('/', [
                 password
             })
         // step 3 - bcyrpt password
-            const salt = await bcyrpt.genSalt(10)
-            user.password = await bcyrpt.hash(password, salt)
+            const salt = await bcrypt.genSalt(10)
+            user.password = await bcrypt.hash(password, salt)
             
             await user.save();
             
