@@ -185,7 +185,7 @@ router.get('/user/:user_id', async (req, res) => {
 
 //@route  DELETE api/profile
 //@desc   DELETE profile ,user & posts -: this route populates all registered users profile
-//@access Public -: requires middleware or token to access this route
+//@access Private -: requires middleware or token to access this route
 
 router.delete('/', auth, async (req, res) => {
     try {
@@ -208,6 +208,99 @@ router.delete('/', auth, async (req, res) => {
     }
     
 })
+
+//@route  PUT api/profile/experience   :- this route is protected for users privately to validate their experience which 
+                                          //comes in an array in the profile schema
+//@desc   PUT  experience profile  for user & posts -: this route populates all users experience,company and nested array
+//@access Private -: requires middleware or token to access this route
+
+router.put('/experience', [auth, [
+    check('title', 'Title is required').not().isEmpty(),
+    check('company', 'Company is required').not().isEmpty(),
+    check('from', 'From date is required').not().isEmpty()
+ 
+]
+], async (req, res) => {
+        const errors = validationResult(req)
+        
+        if (!errors.isEmpty) {
+            res.status(400).json({errors: errors.array()})
+        }
+
+        const {
+            title,
+            company,
+            location,
+            from,
+            to,
+            current,
+            description
+        } = req.body;    // This will destructure the experience in the profileSchema
+
+        const newExp = {
+            title,
+            company,
+            location,
+            from,
+            to,
+            current,
+            description
+        }                    //This will create a data containing the experience object, the user submits at the front end.
+
+        try {  // The try and catch method is used since we want to deal with the database
+
+            const profile = await Profile.findOne({ user: req.user.id })
+            
+            profile.experience.unshift(newExp); // This will remove the experience[0] in the profileSchema and replace
+                                                //  it with the newExp object which is assigned to the objectSchema
+
+            await profile.save()  // This function saves the expected input experience profile fields at the front end
+
+             return res.json(profile);
+            
+        }
+        catch (error) {
+            console.error(error.message)
+
+            res.status(500).send("Server Error")
+            
+        }
+
+})
+
+
+//@route  DELETE api/profile/experience/:exp_id  :- this route is protected for users privately to remove their experience which 
+                                          //is more like updating it by the placeholder :exp_id
+//@desc   Remove  experience from profile  -: this route removes specific users experience, and all its nested
+                                                          // objects like title, company, location, from and to
+//@access Private -: requires middleware or token to access this route
+
+
+router.delete('/experience/:exp_id', auth, async (req, res)=>{
+    try {
+        const profile = await Profile.findOne({ user: req.user.id })   // This is to get the profile of the loggedin user 
+                                                                      //you want to remove from the token
+        
+        // Get remove index
+        const removeIndex = profile.experience.map(item => item.id).indexOf(req.params.exp_id); // This is to get the index
+                                                                                            // of the same loggedin user
+        
+        profile.experience.splice(removeIndex, 1) // This is to splice the experience array of item at index(removeIndex)
+
+        await profile.save(); // This is to resave it 
+
+        res.json(profile) // To get the profile
+    
+    } catch (error) {
+        console.error(error.message)
+        res.status(500).json({ msg: "Server Error" });
+        
+    
+}
+    
+
+})
+
 
 
 
