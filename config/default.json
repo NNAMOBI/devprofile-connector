@@ -1,6 +1,8 @@
 {
     "mongoURI": "mongodb+srv://Nnamobi123:namo@devprofile-m4zyy.mongodb.net/test?retryWrites=true&w=majority",
-    "jwtSecret": "mysecrettoken"
+    "jwtSecret": "mysecrettoken",
+    "githubClientId": "1d362157f738492614b1",
+    "gitHubSecret": "28ee52547522721c9d14a4fe777c80a962bf2cff"
 
     
 }

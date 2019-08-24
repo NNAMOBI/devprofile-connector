@@ -3,6 +3,8 @@
 const express = require('express')
 const router = express.Router()
 const auth = require('../../../middleware/auth')
+const config = require('config')
+const request = require('request')
 
 const Profile = require('../../../models/profile')
 const User = require('../../../models/User')
@@ -300,6 +302,145 @@ router.delete('/experience/:exp_id', auth, async (req, res)=>{
     
 
 })
+
+
+
+
+
+//@route  PUT api/profile/education   :- this route is protected for users privately to validate their education which 
+//comes in an array in the profile schema
+//@desc   PUT  education profile  for user & posts -: this route populates all users experience,company and nested array
+//@access Private -: requires middleware or token to access this route
+
+router.put('/education', [auth, [
+    check('school', 'School is required').not().isEmpty(),
+    check('degree', 'Degree is required').not().isEmpty(),
+    check('fieldofstudy', 'Fieldofstudy is required').not().isEmpty(),
+    check('from', 'From date is required').not().isEmpty()
+
+]
+], async (req, res) => {
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty) {
+        res.status(400).json({ errors: errors.array() });
+    }
+
+    const {
+        school,
+        degree,
+        fieldofstudy,
+        from,
+        to,
+        current,
+        description
+    } = req.body;    // This will destructure the education in the profileSchema
+
+        const newEdu = {
+        
+        school,
+        degree,
+        fieldofstudy,
+        from,
+        to,
+        current,
+        description
+    }                    //This will create a data containing the education object, the user submits at the front end.
+
+    try {  // The try and catch method is used since we want to deal with the database
+
+        const profile = await Profile.findOne({ user: req.user.id })
+
+        profile.education.unshift(newEdu); // This will remove the education[0] in the profileSchema and replace
+        //  it with the newExp object which is assigned to the objectSchema
+
+        await profile.save()  // This function saves the expected input education profile fields at the front end
+
+        return res.json(profile);
+
+    }
+    catch (error) {
+        console.error(error.message)
+
+        res.status(500).send("Server Error")
+
+    }
+
+})
+
+
+//@route  DELETE api/profile/education/:edu_id  :- this route is protected for users privately to remove their education 
+                                                  //which is more like updating it by the placeholder :exp_id
+
+//@desc   Remove education from profile  -: this route removes specific users education, and all its nested
+                                               // objects like title, company, location, from and to
+
+//@access Private -: requires middleware or token to access this route
+
+
+router.delete('/education/:edu_id', auth, async (req, res) => {
+    try {
+        const profile = await Profile.findOne({ user: req.user.id })   // This is to get the profile of the loggedin user 
+                                                                        //you want to remove from the token
+
+        // Get remove index
+        const removeIndex = profile.education.map(item => item.id).indexOf(req.params.edu_id); // This is to get the index
+                                                                                               // of the same loggedin user
+
+        profile.education.splice(removeIndex, 1) // This is to splice the education array of item at index(removeIndex)
+
+        await profile.save(); // This is to resave it 
+
+        res.json(profile) // To get the profile
+
+    } catch (error) {
+        console.error(error.message)
+        res.status(500).json({ msg: "Server Error" });
+
+
+    }
+
+
+})
+
+//@route  GET api/profile/github/:username  :- this route is protected for users privately to get their github repo 
+                                                   // by their username
+
+//@desc   GET repo from github 
+
+//@access Public -: viewing a profile is public , it concerns the public's repository;
+
+router.get('/github/:username', (req, res) => {
+    
+    try {
+
+        const options = {
+            // The req.params.username is the username coming from the url for the user
+            // sort=create date and we want it to be ascending(asc)
+            uri: `https://api.github.com/users/${req.params.username}/repos?per_page=5&sort=created:asc
+            &client_id=${config.get('githubClientId')}&client_secret=${config.get('gitHubSecret')}`,
+            method: 'GET',
+            headers: {'user-agent': 'node.js'}
+        }
+
+        request(options, (error, response, body) => {
+            if(error) console.error(error)
+
+            if (response.statusCode !== 200) {
+                res.status(400).json({msg: 'No Github profile found'})
+            }
+
+            res.json(JSON.parse(body));
+        })
+        
+    }
+    catch (error) {
+        console.error(error.message)
+        res.status(500).send("Server Error")
+    }
+})
+
+
 
 
 
