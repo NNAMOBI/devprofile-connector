@@ -104,7 +104,7 @@ router.get('/:id', auth, async (req, res) => {
 router.delete('/:id', auth, async (req, res) => {
 
     try {
-        const post = await Post.findById(req.params.id); // the request parameter (req) is to accept a id as parmaeter while
+        const post = await Post.findById(req.params.id); // the request parameter (req) is to accept an id as parmaeter while
                                                          // making the request to the backend, and inturn returning the value.
                                                          
 
@@ -201,6 +201,92 @@ router.put('/unlike/:id', auth, async (req, res) => {
 
     }
 })
+
+
+// @route POST api/posts/comment/:id
+// @desc  Create a comment: - comments are identical to post ,except that they don't have likes as opposed to post 
+// @access Private- Users have to login before they can post comments,so we have to import our auth
+//                  middleware
+
+router.post('/comment/:id', [auth, [
+    check('text', 'Text is required').not().isEmpty() // we don't need to validate the name and the avatar input ,we will
+                                                      //verify that from the token sent from the user
+]], async (req, res) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() })
+
+    }
+    try {
+        const user = await User.findById(req.user.id).select('-password') // the req.user.id is the id coming fron the
+                                                                           // token
+        const post = await Post.findById(req.params.id)
+
+        const newComment = { //we don't need to  instatiate new Post from the Post model created just like the like route
+            text: req.body.text,
+            name: user.name,
+            avatar: user.avatar,
+            user: req.user.id
+        }
+
+        post.comments.unshift(newComment)
+
+         await post.save();
+        res.json(post.comments);
+
+    } catch (error) {
+        console.error(error.message)
+        res.status(500).send('Server Error')
+    }
+
+
+
+})
+// @route DELETE api/posts/comment/:id/:comment_id :-  we want to delete the comments by the comment id
+// @desc  delete a comment: - comments are identical to post ,except that they don't have likes as opposed to post
+// @access Private- Users have to login before they can delete comments,so we have to import our auth
+//                  middleware
+
+router.delete('/comment/:id/:comment_id', auth, async(req, res)=>{
+    try {
+        const post = await Post.findById(req.params.id)
+
+        // pull out the comment from the post
+
+        const comment = post.comments.find(comment => comment.id === req.params.comment_id);
+
+        // make sure the comments exists
+        if (!comment) {
+            res.status(400).json({msg: "Comments does not exist"})
+        }
+
+        // Check if the user that wants to delete the comment is the same user(loggedin user) that made the comment
+        
+        if (comment.user.toString() !== req.user.id) {
+
+            res.status(401).json({msg: "User not authorized"})
+        }
+
+        // Get remove index;
+        const removeIndex = post.comments.map(comment => comment.user.toString()).indexOf(req.user.id);
+
+        post.comments.splice(removeIndex, 1);
+
+        await post.save();
+
+        res.json(post.comments)
+
+
+
+
+    }
+    catch (error) {
+        console.error(error.message)
+        res.status(400).json("Server Error")
+    }
+})
+
+
 
 
 
