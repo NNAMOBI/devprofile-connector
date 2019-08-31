@@ -1,0 +1,68 @@
+/* .fixed {
+    position: fixed;
+    overflow: auto;
+} */
+
+
+.nav, a{
+    
+    background-color: #292F36;
+    color: #ffffff;
+    margin: auto;
+    padding: auto;
+    /* height: 60px; */
+}
+
+.nav .dev {
+    list-style: none;
+    text-decoration: none;
+    border-bottom: none;
+    float: right;
+    margin-left: 50px;
+    margin-right: 10px;
+    position: relative;
+    left: 700px;
+    font-size: 90%;
+    top: 7px;   
+}
+ span {
+     margin-left: 20px;
+     font-size: 120%;
+    
+ }
+
+ span:hover, i:hover { 
+  background-color: #FE5E41;
+}
+
+ i {
+     padding-top: 0px;
+     position: relative;
+     top: 5px;
+     left: 15px;
+ }
+
+ .me {
+     position: absolute;
+     left: -40px;
+     bottom: 5px;
+ }
+
+ img {
+     height: 30px;
+     position: absolute;
+     bottom: 2px;
+     left: -30px;
+ }
+ img:hover, img:active {
+
+     height: 150%;
+     width: 50%;
+     
+    }
+
+
+
+
+
+ 
