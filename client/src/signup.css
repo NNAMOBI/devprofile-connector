@@ -1,0 +1,15 @@
+.you {
+position: relative;
+left: -3px;
+}
+
+input[type=Name],input[type=Email],input[type=password] {
+    width: 60%;
+    margin-bottom: -5px;
+    padding-bottom: -10px;
+} 
+
+b {
+    position: relative;
+    left: -8px;
+}

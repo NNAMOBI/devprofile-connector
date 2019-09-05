@@ -1,5 +1,6 @@
 import React from 'react'
 import '../../../src/landing.css'
+import { Link } from 'react-router-dom';
 
 
 const Landing = () => {
@@ -13,8 +14,8 @@ const Landing = () => {
                         other developers</span>
                     </p>
                     <div class="buttons">
-                        <a class="btn btn-danger hover" href="#register.html">Signup</a>   
-                        <a class="btn btn-primary hover2" href="#login.html">Login</a>
+                        <Link to="/register" class="btn btn-danger hover">Signup</Link>   
+                        <Link to="/login" class="btn btn-primary hover2">Login</Link>
                    </div>
                 </div>
 

@@ -25,11 +25,11 @@
     font-size: 90%;
     top: 7px;   
 }
- span {
+  span {
      margin-left: 20px;
      font-size: 120%;
     
- }
+ } 
 
  span:hover, i:hover { 
   background-color: #FE5E41;
@@ -37,15 +37,16 @@
 
  i {
      padding-top: 0px;
-     position: relative;
+     position: absolute;
      top: 5px;
-     left: 15px;
+     left: -35px;
  }
 
  .me {
-     position: absolute;
-     left: -40px;
+     position: relative;
+     left: 10px;
      bottom: 5px;
+    
  }
 
  img {
