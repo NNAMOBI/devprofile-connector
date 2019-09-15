@@ -2,8 +2,13 @@ import React, { Fragment, useState } from 'react'
 import {Link} from 'react-router-dom'
 import '../../../src/signup.css'
 // import axios from 'axios'
+import { connect } from 'react-redux'
+import {setAlert} from '../../actions/alert' // import the action to be used in this component
+import PropTypes from 'prop-types'
 
-const Signup = () => {
+const Signup = (props) => {
+
+    const { setAlert } = props;
 
     const [formData, setFormData] = useState({
         name: "",
@@ -20,7 +25,7 @@ const Signup = () => {
     const onSubmit = async (e) => {
         e.preventDefault();
         if(password !== password2){
-            alert("password do not Match")
+            setAlert("password do not Match", 'danger') // instead of just alert(password dont match)
         } else{
             
             // An example of how to make a request inside the component else Redux can handle it.
@@ -90,4 +95,8 @@ const Signup = () => {
     )
 }
 
-export default Signup;
+Signup.propTypes = {
+    setAlert: PropTypes.func.isRequired  // proptypes are used to validate the props used in the component
+}
+
+export default connect(null, {setAlert})(Signup);
